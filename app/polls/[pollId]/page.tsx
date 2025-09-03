@@ -1,8 +1,8 @@
 import VotePanel from "@/components/vote-panel";
 import QRCodeDisplay from "@/components/qrcode-display";
 
-export default function PollViewPage({ params }: { params: { pollId: string } }) {
-  const { pollId } = params;
+export default async function PollViewPage({ params }: { params: Promise<{ pollId: string }> }) {
+  const { pollId } = await params;
   // TODO: fetch poll by pollId
   return (
     <section className="space-y-6">
@@ -18,5 +18,6 @@ export default function PollViewPage({ params }: { params: { pollId: string } })
     </section>
   );
 }
+
 
 

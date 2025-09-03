@@ -21,14 +21,17 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      setError(error.message);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      // Navigate after session is set; middleware will also guard
+      router.replace("/dashboard");
+    } finally {
+      // Avoid a stuck "Signing in..." state if navigation is delayed
       setLoading(false);
-    } else {
-      router.push("/dashboard");
     }
   };
 

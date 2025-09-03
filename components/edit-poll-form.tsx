@@ -5,16 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createPoll } from "@/lib/actions/polls";
+import { updatePoll } from "@/lib/actions/polls";
+import { useRouter } from "next/navigation";
 
-export default function PollForm() {
-  const [options, setOptions] = useState<string[]>(["", ""]);
-  const [question, setQuestion] = useState("");
+interface EditPollFormProps {
+  pollId: string;
+  initialQuestion: string;
+  initialOptions: string[];
+}
+
+export default function EditPollForm({ pollId, initialQuestion, initialOptions }: EditPollFormProps) {
+  const [options, setOptions] = useState<string[]>(initialOptions);
+  const [question, setQuestion] = useState(initialQuestion);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
-  function addOption() { setOptions((o) => [...o, ""]); }
-  function removeOption(i: number) { setOptions((o) => o.filter((_, idx) => idx !== i)); }
+  function addOption() { 
+    setOptions((o) => [...o, ""]); 
+  }
+  
+  function removeOption(i: number) { 
+    setOptions((o) => o.filter((_, idx) => idx !== i)); 
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,18 +40,12 @@ export default function PollForm() {
       options.forEach((o) => fd.append("options[]", o));
       
       // submit via server action
-      await createPoll(fd);
-      // If successful, the server action will redirect
-      // If there's an error, it will throw and be caught below
+      await updatePoll(pollId, fd);
+      // If successful, redirect to dashboard
+      router.push("/dashboard");
     } catch (error: any) {
-      // Check if this is a Next.js redirect (which is not an error)
-      if (error?.digest?.includes('NEXT_REDIRECT')) {
-        // This is a successful redirect, not an error
-        return;
-      }
-      
-      console.error("Failed to create poll:", error);
-      setError(error instanceof Error ? error.message : "Failed to create poll");
+      console.error("Failed to update poll:", error);
+      setError(error instanceof Error ? error.message : "Failed to update poll");
       setIsSubmitting(false);
     }
   }
@@ -49,7 +56,9 @@ export default function PollForm() {
 
   return (
     <Card>
-      <CardHeader><CardTitle>New Poll</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle>Edit Poll</CardTitle>
+      </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={onSubmit} className="space-y-4">
           {error && (
@@ -81,21 +90,32 @@ export default function PollForm() {
                     required
                   />
                   {options.length > 2 && (
-                    <Button type="button" variant="outline" onClick={() => removeOption(i)}>Remove</Button>
+                    <Button type="button" variant="outline" onClick={() => removeOption(i)}>
+                      Remove
+                    </Button>
                   )}
                 </div>
               ))}
             </div>
-            <Button type="button" variant="secondary" onClick={addOption}>Add option</Button>
+            <Button type="button" variant="secondary" onClick={addOption}>
+              Add option
+            </Button>
           </div>
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create poll"}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Updating..." : "Update poll"}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => router.push("/dashboard")}
+            >
+              Cancel
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
   );
 }
-
-

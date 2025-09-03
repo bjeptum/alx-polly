@@ -1,24 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ALX Polly - Polling App with QR Code Sharing
+
+A modern polling application built with Next.js, Supabase, and TypeScript. Create polls, share them via QR codes, and collect votes from users.
+
+## Features
+
+- 🔐 User authentication and registration
+- 📊 Create and manage polls with multiple options
+- 🗳️ Vote on polls (authenticated and anonymous)
+- 📱 Share polls via QR codes
+- 📈 View poll results with interactive charts
+- 🎨 Modern UI with Tailwind CSS and shadcn/ui
+
+## Tech Stack
+
+- **Frontend**: Next.js 15.5.2 (App Router), React 19, TypeScript
+- **Backend**: Supabase (Database, Auth, Real-time)
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **QR Codes**: qrcode.react
+- **Forms**: React Hook Form with Zod validation
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- A Supabase account and project
+
+### 1. Clone and Install Dependencies
+
+```bash
+git clone <repository-url>
+cd alx-polly
+npm install
+```
+
+### 2. Set up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to your project's API settings: `https://supabase.com/dashboard/project/_/settings/api`
+3. Copy your project URL and anon key
+
+### 3. Environment Configuration
+
+Create a `.env.local` file in the root directory:
+
+```bash
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# Optional: Service role key for server-side operations
+# SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+```
+
+### 4. Database Setup
+
+1. Open the Supabase SQL editor in your project dashboard
+2. Copy and paste the contents of `supabase/schema.sql`
+3. Run the SQL to create the database schema
+
+### 5. Start the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
 

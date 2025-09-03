@@ -2,16 +2,28 @@ import { requireAuthServer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import PollActions from "@/components/poll-actions";
 import Link from "next/link";
 
 export default async function DashboardPage() {
   const user = await requireAuthServer();
   const supabase = await createClient();
 
-  // Fetch user's polls
+  // Fetch user's polls with vote counts
   const { data: polls } = await supabase
     .from("polls")
-    .select("id, title, created_at, is_active")
+    .select(`
+      id, 
+      title, 
+      description,
+      created_at, 
+      is_active,
+      poll_options (
+        id,
+        votes (id)
+      )
+    `)
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -71,36 +83,55 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Your Polls</CardTitle>
           </CardHeader>
           <CardContent>
             {polls && polls.length > 0 ? (
-              <div className="space-y-3">
-                {polls.slice(0, 5).map((poll) => (
-                  <div key={poll.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{poll.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Created {new Date(poll.created_at).toLocaleDateString()}
-                      </p>
+              <div className="space-y-4">
+                {polls.map((poll) => {
+                  const totalVotes = poll.poll_options?.reduce((sum, option) => sum + (option.votes?.length || 0), 0) || 0;
+                  return (
+                    <div key={poll.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium truncate">{poll.title}</h3>
+                          <Badge variant={poll.is_active ? "default" : "secondary"}>
+                            {poll.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </div>
+                        {poll.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-1 mb-1">
+                            {poll.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>Created {new Date(poll.created_at).toLocaleDateString()}</span>
+                          <span>{totalVotes} votes</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Link href={`/polls/${poll.id}`}>
+                          <Button variant="outline" size="sm">View</Button>
+                        </Link>
+                        <Link href={`/polls/${poll.id}/results`}>
+                          <Button variant="outline" size="sm">Results</Button>
+                        </Link>
+                        <PollActions 
+                          pollId={poll.id} 
+                          isActive={poll.is_active}
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        poll.is_active 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                      }`}>
-                        {poll.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                      <Link href={`/polls/${poll.id}`}>
-                        <Button variant="outline" size="sm">View</Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <p className="text-muted-foreground">No recent activity. Create your first poll to get started!</p>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">No polls yet. Create your first poll to get started!</p>
+                <Link href="/polls/new">
+                  <Button>Create Your First Poll</Button>
+                </Link>
+              </div>
             )}
           </CardContent>
         </Card>

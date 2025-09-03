@@ -3,8 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { deletePoll } from "@/lib/actions/polls";
-import { Trash2, Edit } from "lucide-react";
 
 export default async function DashboardPage() {
   const user = await requireAuthServer();
@@ -94,34 +92,9 @@ export default async function DashboardPage() {
                       }`}>
                         {poll.is_active ? 'Active' : 'Inactive'}
                       </span>
-                      <div className="flex items-center gap-1">
-                        <Link href={`/polls/${poll.id}`}>
-                          <Button variant="outline" size="sm">View</Button>
-                        </Link>
-                        <Link href={`/polls/${poll.id}/edit`}>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                        <form action={async () => {
-                          "use server";
-                          await deletePoll(poll.id);
-                        }}>
-                          <Button 
-                            type="submit" 
-                            variant="outline" 
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={(e) => {
-                              if (!confirm("Are you sure you want to delete this poll? This action cannot be undone.")) {
-                                e.preventDefault();
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </form>
-                      </div>
+                      <Link href={`/polls/${poll.id}`}>
+                        <Button variant="outline" size="sm">View</Button>
+                      </Link>
                     </div>
                   </div>
                 ))}

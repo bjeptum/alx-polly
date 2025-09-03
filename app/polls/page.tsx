@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-import { requireAuthServer } from "@/lib/auth";
 
 interface PollsPageProps {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -12,7 +11,6 @@ interface PollsPageProps {
 
 export default async function PollsPage({ searchParams }: PollsPageProps) {
   const supabase = await createClient();
-  const user = await requireAuthServer();
   const showSuccess = searchParams.success === "true";
 
   // Fetch all active polls with their options and vote counts
@@ -73,7 +71,7 @@ export default async function PollsPage({ searchParams }: PollsPageProps) {
       {transformedPolls.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {transformedPolls.map((poll) => (
-            <PollCard key={poll.id} poll={poll} currentUserId={user.id} />
+            <PollCard key={poll.id} poll={poll} />
           ))}
         </div>
       ) : (

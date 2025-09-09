@@ -6,12 +6,13 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 interface PollsPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function PollsPage({ searchParams }: PollsPageProps) {
   const supabase = await createClient();
-  const showSuccess = searchParams.success === "true";
+  const sp = await searchParams;
+  const showSuccess = sp.success === "true";
 
   // Fetch all active polls with their options and vote counts
   const { data: polls, error } = await supabase
@@ -22,8 +23,7 @@ export default async function PollsPage({ searchParams }: PollsPageProps) {
       description,
       created_at,
       is_active,
-      owner_id,
-      profiles!polls_owner_id_fkey(full_name, email)
+      owner_id
     `)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
@@ -40,11 +40,7 @@ export default async function PollsPage({ searchParams }: PollsPageProps) {
     );
   }
 
-  // Transform the data to match the expected Poll interface
-  const transformedPolls = polls?.map(poll => ({
-    ...poll,
-    profiles: Array.isArray(poll.profiles) ? poll.profiles[0] : poll.profiles
-  })) || [];
+  const transformedPolls = polls || [];
 
   return (
     <div className="container mx-auto px-4 py-8">

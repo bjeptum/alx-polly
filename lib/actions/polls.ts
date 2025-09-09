@@ -236,4 +236,50 @@ export async function togglePollStatus(pollId: string) {
   revalidatePath("/polls");
 }
 
+export async function submitVote(formData: FormData) {
+  "use server";
+  const supabase = await createClient();
+
+  const pollId = String(formData.get("pollId") || "").trim();
+  const optionId = String(formData.get("optionId") || "").trim();
+  const fingerprint = String(formData.get("fingerprint") || "").trim();
+
+  if (!pollId || !optionId) {
+    throw new Error("Missing pollId or optionId");
+  }
+
+  // Get current user if authenticated
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Insert vote
+  const { error: voteError } = await supabase.from("votes").insert({
+    poll_id: pollId,
+    option_id: optionId,
+    voter_id: user?.id ?? null,
+    voter_fingerprint: user ? null : fingerprint || null,
+  });
+
+  if (voteError) {
+    const message = (voteError.message || "").toLowerCase();
+    const isUniqueViolation =
+      voteError.code === "23505" ||
+      message.includes("duplicate key value") ||
+      message.includes("uniq_vote_per_poll_user") ||
+      message.includes("uniq_vote_per_poll_fingerprint");
+
+    if (isUniqueViolation) {
+      // User (or fingerprint) has already voted on this poll. Send them to results.
+      redirect(`/polls/${pollId}/results?alreadyVoted=true`);
+    }
+
+    throw new Error(voteError.message);
+  }
+
+  revalidatePath(`/polls/${pollId}`);
+  revalidatePath(`/polls/${pollId}/results`);
+  redirect(`/polls/${pollId}/results`);
+}
+
 

@@ -2,6 +2,7 @@ import { requireAuthServer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import EditPollForm from "@/components/edit-poll-form";
+import type { PollWithOptions } from "@/lib/types";
 
 interface EditPollPageProps {
   params: {
@@ -40,7 +41,8 @@ export default async function EditPollPage({ params }: EditPollPageProps) {
   }
 
   // Sort options by position
-  const sortedOptions = poll.poll_options?.sort((a, b) => a.position - b.position) || [];
+  const typed: PollWithOptions = poll as PollWithOptions;
+  const sortedOptions = typed.poll_options?.sort((a, b) => a.position - b.position) || [];
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -51,9 +53,9 @@ export default async function EditPollPage({ params }: EditPollPageProps) {
         </div>
 
         <EditPollForm 
-          pollId={poll.id}
-          initialTitle={poll.title}
-          initialDescription={poll.description || ""}
+          pollId={typed.id}
+          initialTitle={typed.title}
+          initialDescription={typed.description || ""}
           initialOptions={sortedOptions.map(option => option.label)}
         />
       </div>

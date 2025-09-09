@@ -24,7 +24,7 @@ export default function Navbar() {
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <Link href="/" className="font-semibold">ALX Polly</Link>
         <NavigationMenu>
-          <NavigationMenuList>
+          <NavigationMenuList className="gap-4">
             <NavigationMenuItem><Link href="/polls">Polls</Link></NavigationMenuItem>
             <NavigationMenuItem><Link href="/polls/new">New Poll</Link></NavigationMenuItem>
             <NavigationMenuItem><Link href="/dashboard">Dashboard</Link></NavigationMenuItem>
